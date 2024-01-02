@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
     var currentInput = StringBuilder() //represents a mutable sequence of characters
     var currentOperator = Operator.NONE
-    var operand1: BigDecimal? = null
+    var firstInput: BigDecimal? = null
 
     enum class Operator {
         NONE, ADD, SUBTRACT, MULTIPLY, DIVIDE
@@ -42,14 +42,22 @@ class MainActivity : AppCompatActivity() {
         binding.btn0.setOnClickListener { appendNumber("0") }
         binding.btnDot.setOnClickListener { appendNumber(".") }
         // Set click listeners for operator buttons
-        binding.btnPlus.setOnClickListener { setOperator(Operator.ADD) }
-        binding.btnSubstraction.setOnClickListener { setOperator(Operator.SUBTRACT) }
-        binding.btnMultify.setOnClickListener { setOperator(Operator.MULTIPLY) }
-        binding.btnDivide.setOnClickListener { setOperator(Operator.DIVIDE) }
-//
-//        // Handle equals button click
-//        binding.btnEqual.setOnClickListener { calculateResult() }
-//
+        binding.btnPlus.setOnClickListener {
+            calculateResult()
+            setOperator(Operator.ADD) }
+        binding.btnSubstraction.setOnClickListener {
+            calculateResult()
+            setOperator(Operator.SUBTRACT) }
+        binding.btnMultify.setOnClickListener {
+            calculateResult()
+            setOperator(Operator.MULTIPLY) }
+        binding.btnDivide.setOnClickListener {
+            calculateResult()
+            setOperator(Operator.DIVIDE) }
+
+        // Handle equals button click
+        binding.btnEqual.setOnClickListener { calculateResult() }
+
         // Handle clear button click
         binding.btnAC.setOnClickListener {
             allClearInput()
@@ -72,16 +80,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    private fun setOperator(operator: Operator) {
-//        if (operand1 == null) {
-//            operand1 = BigDecimal(currentInput.toString())
-//            currentInput.clear()
-//        }
-//        tvOldInput.text = operand1.toString()
-//        tvInput.text = ""
-//        currentOperator = operator
-//        tvCurrentOperand.text = operatorToString(operator)
-//    }
+
     private fun setOperator(operator:Operator){
         if(currentOperator==Operator.NONE){
             currentOperator = operator
@@ -131,6 +130,31 @@ class MainActivity : AppCompatActivity() {
 ////        Log.d("CalculatorApp", "Result: ${result?.toString()}")
 //
 //    }
+    private fun calculateResult(){
+
+        var numbersAndSysmbols = listOf<String>()
+        var result: BigDecimal? = null
+        if (currentOperator!=Operator.NONE){
+            numbersAndSysmbols = currentInput.split(Regex("(?<=\\d)(?=[+\\-*/])|(?<=[+\\-*/])(?=\\d)|(?<=[+\\-*/])|(?=[+\\-*/])"))
+
+            when (currentOperator) {
+            Operator.ADD -> result = numbersAndSysmbols[0].toBigDecimal()?.plus(numbersAndSysmbols[2].toBigDecimal())
+            Operator.SUBTRACT -> result = numbersAndSysmbols[0].toBigDecimal()?.minus(numbersAndSysmbols[2].toBigDecimal())
+            Operator.MULTIPLY -> result = numbersAndSysmbols[0].toBigDecimal()?.times(numbersAndSysmbols[2].toBigDecimal())
+            Operator.DIVIDE -> {
+                if (numbersAndSysmbols[2].toBigDecimal() != BigDecimal.ZERO) {
+                    result = numbersAndSysmbols[0].toBigDecimal()?.div(numbersAndSysmbols[2].toBigDecimal())
+                }
+            }
+            Operator.NONE -> result = numbersAndSysmbols[2].toBigDecimal()
+        }
+            currentInput = StringBuilder(result!!.toPlainString())
+            updateDisplay()
+
+        }
+
+    }
+
     private fun allClearInput() {
         currentInput.clear()            //making StringBuilder empty
         binding.outputViwer.text = ""
